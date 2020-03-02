@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DatabaseManager;
+
+using System;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -10,10 +12,10 @@ namespace Transact
         {
             Start();
 
-            SelectExample();
             UpdateExample();
-            InsertExample();
+            SelectExample();
             DeleteExample();
+            InsertExample();
 
             Stop();
         }
@@ -89,22 +91,8 @@ namespace Transact
         /// </summary>
         private static void SelectExample_DataAdapter()
         {
-            string connectionString = @"Data Source=(local)\SS2019;Initial Catalog=TRANSACT_DEV;User ID=tct;Password=tct";
             string sql = "SELECT TOP 2 * FROM [TCT].[TRANSACT]";
-
-            Console.WriteLine("Select using DataAdapter");
-            using DataSet dataSet = new DataSet();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    connection.Open();
-
-                    using SqlDataAdapter adapter = new SqlDataAdapter();
-                    adapter.SelectCommand = command;
-                    adapter.Fill(dataSet);
-                }
-            }
+            using DataSet dataSet = DatabaseHelper.Select(sql);
 
             Console.WriteLine(string.Format("Processing DataSet: {0} Tables", dataSet.Tables.Count));
             foreach (DataTable table in dataSet.Tables)
@@ -140,24 +128,11 @@ namespace Transact
         /// </summary>
         private static void UpdateExample()
         {
-            string connectionString = @"Data Source=(local)\SS2019;Initial Catalog=TRANSACT_DEV;User ID=tct;Password=tct";
-            string sql = "UPDATE [TCT].[TRANSACT] SET DESCRIPTION = CONCAT(DESCRIPTION, ', now NEW and IMPROVED')";
-
             Console.WriteLine("Update using DataAdapter");
-            using DataSet dataSet = new DataSet();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    connection.Open();
-
-                    using SqlDataAdapter adapter = new SqlDataAdapter();
-                    adapter.UpdateCommand = command;
-                    int affectedRows = adapter.UpdateCommand.ExecuteNonQuery();
-                    Console.WriteLine(string.Format("Updated {0} Rows", affectedRows));
-                    Console.WriteLine();
-                }
-            }
+            string sql = "UPDATE [TCT].[TRANSACT] SET DESCRIPTION = CONCAT(DESCRIPTION, ', now NEW and IMPROVED')";
+            int affectedRecords = DatabaseHelper.Update(sql);
+            Console.WriteLine(string.Format("Updated {0} Rows", affectedRecords));
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -165,24 +140,11 @@ namespace Transact
         /// </summary>
         private static void InsertExample()
         {
-            string connectionString = @"Data Source=(local)\SS2019;Initial Catalog=TRANSACT_DEV;User ID=tct;Password=tct";
-            string sql = "INSERT INTO [TCT].[TRANSACT] VALUES(2, 1, 1, 100010, GETUTCDATE(), 1, 1, 'Generic Description', 0, 1000, 1000, 0, 1, GETUTCDATE(), 1, GETUTCDATE())";
-
             Console.WriteLine("Insert using DataAdapter");
-            using DataSet dataSet = new DataSet();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    connection.Open();
-
-                    using SqlDataAdapter adapter = new SqlDataAdapter();
-                    adapter.InsertCommand = command;
-                    int affectedRows = adapter.InsertCommand.ExecuteNonQuery();
-                    Console.WriteLine(string.Format("Inserted {0} Rows", affectedRows));
-                    Console.WriteLine();
-                }
-            }
+            string sql = "INSERT INTO [TCT].[TRANSACT] VALUES(2, 1, 1, 100010, GETUTCDATE(), 1, 1, 'Generic Description', 0, 1000, 1000, 0, 1, GETUTCDATE(), 1, GETUTCDATE())";
+            int affectedRecords = DatabaseHelper.Insert(sql);
+            Console.WriteLine(string.Format("Inserted {0} Rows", affectedRecords));
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -190,25 +152,12 @@ namespace Transact
         /// </summary>
         private static void DeleteExample()
         {
-            string connectionString = @"Data Source=(local)\SS2019;Initial Catalog=TRANSACT_DEV;User ID=tct;Password=tct";
+            Console.WriteLine("Delete using DataAdapter");
             string sql = "WITH CTE AS (SELECT TOP 1 * FROM [TCT].[TRANSACT] ORDER BY ID DESC)\r\nDELETE FROM CTE";
             //string sql = "DELETE FROM [TCT].[TRANSACT] WHERE ID IN (SELECT TOP 2 ID FROM [TCT].[TRANSACT] ORDER BY ID DESC)";
-
-            Console.WriteLine("Delete using DataAdapter");
-            using DataSet dataSet = new DataSet();
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                using (SqlCommand command = new SqlCommand(sql, connection))
-                {
-                    connection.Open();
-
-                    using SqlDataAdapter adapter = new SqlDataAdapter();
-                    adapter.DeleteCommand = command;
-                    int affectedRows = adapter.DeleteCommand.ExecuteNonQuery();
-                    Console.WriteLine(string.Format("Deleted {0} Rows", affectedRows));
-                    Console.WriteLine();
-                }
-            }
+            int affectedRecords = DatabaseHelper.Delete(sql);
+            Console.WriteLine(string.Format("Deleted {0} Rows", affectedRecords));
+            Console.WriteLine();
         }
 
         private static void ProcessRecord_Foreach(object[] record)
